@@ -47,7 +47,7 @@ def get_sentiment(text):
     if not text or pd.isna(text):
         return "Neutral"
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        model = genai.GenerativeModel("gemini-2.5-flash")
         prompt = f"""Classify the sentiment of the following review as exactly one word: Positive, Negative, or Neutral.
         Review: {text}
         Sentiment:"""
