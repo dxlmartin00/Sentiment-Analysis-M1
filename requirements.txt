@@ -1,0 +1,9 @@
+streamlit
+pandas
+plotly
+google-generativeai
+python-dotenv
+vaderSentiment
+transformers 
+torch
+nltk
