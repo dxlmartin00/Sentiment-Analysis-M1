@@ -10,12 +10,27 @@ import nltk
 
 nltk.download('stopwords')
 
-# Load environment variables
+# Load environment variables (for local development)
 load_dotenv()
 
-# Initialize Gemini client
-# The API key is automatically loaded from the GEMINI_API_KEY environment variable.
-genai.configure(api_key="AIzaSyCBFLM7LrfLB448sueX631aoTBAzHJsbXQ")
+# Initialize Gemini client - Works for both local and Streamlit Cloud
+def get_api_key():
+    """Get API key from Streamlit secrets (cloud) or environment variable (local)"""
+    # Try Streamlit secrets first (for cloud deployment)
+    try:
+        return st.secrets["GEMINI_API_KEY"]
+    except (KeyError, FileNotFoundError):
+        # Fall back to environment variable (for local development)
+        return os.getenv("GEMINI_API_KEY")
+
+api_key = get_api_key()
+if not api_key:
+    st.error("⚠️ GEMINI_API_KEY not found! Please set it in Streamlit secrets or .env file.")
+    st.info("📖 For local development: Add GEMINI_API_KEY to your .env file")
+    st.info("☁️ For Streamlit Cloud: Add GEMINI_API_KEY to your app secrets in the dashboard")
+    st.stop()
+
+genai.configure(api_key=api_key)
 
 # Helper function to get dataset path
 def get_dataset_path():
@@ -54,7 +69,7 @@ with col1:
         try:
             csv_path = get_dataset_path()
             df = pd.read_csv(csv_path)
-            st.session_state["df"] = df.head(50)
+            st.session_state["df"] = df.head(10)
             st.success("Dataset loaded successfully!")
         except FileNotFoundError:
             st.error("Dataset not found. Please check the file path.")
@@ -73,9 +88,9 @@ with col2:
 
 if "df" in st.session_state:
     # Product filter dropdown
-    st.subheader("🔍 Filter by Product")
+    st.subheader("🔎 Filter by Product")
     product = st.selectbox("Choose a product", ["All Products"] + list(st.session_state["df"]["PRODUCT"].unique()))
-    st.subheader(f"📁 Reviews for {product}")
+    st.subheader(f"📄 Reviews for {product}")
 
     if product != "All Products":
         filtered_df = st.session_state["df"][st.session_state["df"]["PRODUCT"] == product]
